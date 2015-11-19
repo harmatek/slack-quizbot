@@ -1,0 +1,37 @@
+{
+    "name": "slack-quizbot",
+    "version": "0.0.0",
+    "description": "Quiz Bot for Slack",
+    "main": "./quizbot.js",
+    "scripts": {
+    "test": "make test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/HarounaMadi/slack-quizbot.git"
+    },
+    "keywords": [
+        "slack",
+        "bot",
+        "quiz"
+    ],
+    "author": {
+        "name": "Harouna MADI",
+        "url": "http://www.harouna-madi.fr"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/HarounaMadi/slack-quizbot/issues"
+    },
+    "homepage": "https://github.com/HarounaMadi/slack-quizbot#readme",
+    "dependencies": {
+        "log": "^1.4.0",
+        "merge": "^1.2.0",
+        "nosql": "^3.0.5",
+        "slack-client": "^1.4.1"
+    },
+    "engines": {
+        "node": ">= 0.10.x",
+        "npm": ">= 1.1.x"
+    }
+}
