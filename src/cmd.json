@@ -1,0 +1,37 @@
+{
+    "enable": {
+        "desc": "Enable bot",
+        "fn": "enable",
+        "public": false
+    },
+    "disable": {
+        "desc": "Disable bot",
+        "fn": "disable",
+        "public": false
+    },
+    "start": {
+        "desc": "Start quiz",
+        "fn": "start",
+        "public": true
+    },
+    "stop": {
+        "desc": "Stop quiz",
+        "fn": "stop",
+        "public": false
+    },
+    "score": {
+        "desc": "Give all score",
+        "fn": "score",
+        "public": true
+    },
+    "myscore": {
+        "desc": "Give current user score",
+        "fn": "myscore",
+        "public": true
+    },
+    "help": {
+        "desc": "Helpe user",
+        "fn": "help",
+        "public": true
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "bot_disabled": "QuizBot est désactivé pour le moment. Seul un administrateur peut l'activé !",
+    "bot_disabled_admin": "QuizBot est désactivé !",
+    "bot_quizz_start": "Okaay! Le quiz débute dans *%s* secondes avec une serie de *%s* questions :wink:",
+    "bot_no_questions": "Désolé mais aucune question trouvée dans la base :disappointed",
+    "bot_score_user": "%s. *%s* avec %s point(s)%s",
+    "bot_my_score": "Votre score est de *%s point(s)*.",
+    "bot_my_score_null": "Votre score est nul et vierge, dernier de la classe quoi :lol:",
+    "bot_stopped": "Le quizz a été stoper par un administrateur.",
+
+    "right_answer": ":clap: Bonne réponse *%s* !",
+    "give_answer": "La réponse été bien *%s*.",
+    "next_question_in": "Prochaine question dans *%s* secondes.",
+
+    "success_file_created": "Le fichier %s n'existé pas et a été créer avec succès",
+    "error_file_not_exists_can_t_create": "Le fichier %s n'existe pas et n'a pu être créer"
+}
