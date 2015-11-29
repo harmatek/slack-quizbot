@@ -1,7 +1,7 @@
 {
   "name": "slack-quizbot",
-  "version": "0.6.1",
-  "description": "Quiz Bot for Slack",
+  "version": "0.6.2",
+  "description": "This is a QuizBot to use with Slack.",
   "main": "./quizbot.js",
   "scripts": {
     "test": "make test"

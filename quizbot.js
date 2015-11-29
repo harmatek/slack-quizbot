@@ -1,7 +1,7 @@
 /**
  * This file is part of slack-quizbot package.
  *
- * Copyright (c) 2015 Harouna Madi <madi.harouna@gmail.com> (http://www.harouna-madi.fr)
+ * Copyright (c) 2015 Harouna Madi <bonjour@harouna-madi.fr> (http://www.harouna-madi.fr)
  *
  * License
  * For full copyright and license information, please see the LICENSE
