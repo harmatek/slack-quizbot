@@ -4,7 +4,7 @@ This is a QuizBot to use with [Slack](https://slack.com).
 
 ## Installation
 ```bash
-npm install slack-quizbot --save
+npm install slack-quizbot
 ```
 
 ## Configuration
