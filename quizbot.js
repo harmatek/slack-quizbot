@@ -187,7 +187,7 @@ QuizBot = (function(){
                         } else {
                             quizbot.slack.openDM(user.id, function (response) {
                                 quizbot.message.channel = quizbot.slack.getChannelGroupOrDMByID(response.channel.id);
-                                quizbot.message.channel.send(Vsprintf(BotMessage.bot_my_score_null, [userScore.score]));
+                                quizbot.message.channel.send(Vsprintf(BotMessage.bot_my_score_null));
                                 quizbot.slack.dms[response.channel.id].close();
                             });
                         }

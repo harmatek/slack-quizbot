@@ -5,7 +5,7 @@
     "bot_no_questions": "Désolé mais aucune question trouvée dans la base :disappointed",
     "bot_score_user": "%s. *%s* avec %s point(s)%s",
     "bot_my_score": "Votre score est de *%s point(s)*.",
-    "bot_my_score_null": "Votre score est nul et vierge, dernier de la classe quoi :lol:",
+    "bot_my_score_null": "Votre score est nul et vierge, dernier de la classe quoi :grin:",
     "bot_stopped": "Le quizz a été stoper par un administrateur.",
 
     "right_answer": ":clap: Bonne réponse *%s* !",
