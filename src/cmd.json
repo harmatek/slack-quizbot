@@ -29,6 +29,11 @@
         "fn": "myscore",
         "public": true
     },
+    "repeat": {
+        "desc": "Give current question",
+        "fn": "repeat",
+        "public": true
+    },
     "help": {
         "desc": "Helpe user",
         "fn": "help",

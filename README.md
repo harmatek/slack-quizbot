@@ -11,7 +11,7 @@ npm install slack-quizbot
 
 ```javascript
 token: "", // Your bot token
-admin: [], // List of administrators who can perform special commands
+admin: [], // List of administrators who can perform special commands. A slack admin is considered as an admin for bot.
 autoReconnect: true, // Automatically reconnect after an error response from Slack.
 autoMark: true, // Automatically mark each message as read after it is processed.
 quizLimit: 25, // Number of questions
@@ -48,6 +48,7 @@ quizbot.initialize();
 * **!stop** : Stops current quiz
 * **!score** : Displays scores (DM)
 * **!myscore** : Displays the user's score (DM)
+* **!repeat** : Give current question (DM)
 * **!help** : Display help (DM)
 
 ## Examples

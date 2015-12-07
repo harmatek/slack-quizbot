@@ -6,10 +6,11 @@
     "bot_score_user": "%s. *%s* avec %s point(s)%s",
     "bot_my_score": "Votre score est de *%s point(s)*.",
     "bot_my_score_null": "Votre score est nul et vierge, dernier de la classe quoi :grin:",
-    "bot_stopped": "Le quizz a été stoper par un administrateur.",
+    "bot_stopped": "*Le quizz a été stoper par un administrateur.*",
 
     "right_answer": ":clap: Bonne réponse *%s* !",
     "give_answer": "La réponse été bien *%s*.",
+    "give_score": "%s tu gagne *%s* point(s) pour cette question, cela te fais un score de *%s* point(s) !",
     "next_question_in": "Prochaine question dans *%s* secondes.",
 
     "success_file_created": "Le fichier %s n'existé pas et a été créer avec succès",

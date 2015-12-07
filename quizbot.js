@@ -30,6 +30,7 @@ Fs = require("fs");
 QuizBot = (function(){
     function QuizBot(config){
         var defaultOptions = {
+            token: '',
             autoReconnect: true,
             autoMark: true,
 
@@ -38,6 +39,7 @@ QuizBot = (function(){
             quizNextQuestionDelay: 5,
             quizBasePoint: 5,
             channel: "game",
+            admin: [],
 
             databases: {
                 "questions": "./data/questions.json",
@@ -88,29 +90,34 @@ QuizBot = (function(){
 
     QuizBot.prototype.executeCommand = {
         disable: function(args, quizbot){
+            console.log('CMD DISABLE');
             if(quizbot.botStatus == BOT_STATUS_ENABLED) {
                 quizbot.slack.setPresence('away');
                 quizbot.botStatus = BOT_STATUS_DISABLED;
                 quizbot.questions = [];
                 quizbot.logger.info('QuizBot DISABLED');
+                quizbot.message.channel = quizbot.slack.getChannelByName(quizbot.config.channel);
             }
 
             return QuizBot;
         },
         enable: function(args, quizbot){
+            console.log('CMD ENABLE');
             if(quizbot.botStatus == BOT_STATUS_DISABLED) {
                 quizbot.slack.setPresence('active');
                 quizbot.botStatus = BOT_STATUS_ENABLED;
                 quizbot.logger.info('QuizBot ENABLED');
+                quizbot.message.channel = quizbot.slack.getChannelByName(quizbot.config.channel);
             }
 
             return QuizBot;
         },
         start: function(args, quizbot){
-            quizbot.config.quizStartTime = quizbot.config.quizStartTime < 5 ? 5 : quizbot.config.quizStartTime;
-
+            console.log('CMD START');
             if(quizbot.botStatus == BOT_STATUS_ENABLED){
+                quizbot.config.quizStartTime = quizbot.config.quizStartTime < 5 ? 5 : quizbot.config.quizStartTime;
                 quizbot.prepareQuestions();
+                quizbot.message.channel = quizbot.slack.getChannelByName(quizbot.config.channel);
 
                 if(quizbot.questions.length){
                     quizbot.botStatus = BOT_STATUS_START;
@@ -125,6 +132,7 @@ QuizBot = (function(){
             return QuizBot;
         },
         stop: function(args, quizbot){
+            console.log('CMD STOP');
             if(quizbot.botStatus == BOT_STATUS_START) {
                 quizbot.botStatus = BOT_STATUS_ENABLED;
                 quizbot.logger.info('QuizBot STOPPED');
@@ -135,7 +143,8 @@ QuizBot = (function(){
             return QuizBot;
         },
         score: function(args, quizbot){
-            if(quizbot.botStatus == BOT_STATUS_ENABLED) {
+            console.log('CMD SCORE');
+            if(quizbot.botStatus == BOT_STATUS_START) {
                 var user, userId, scores, list, i = 0;
 
                 userId = quizbot.message.user.id;
@@ -167,33 +176,25 @@ QuizBot = (function(){
             return QuizBot;
         },
         myscore: function(args, quizbot){
-            if(quizbot.botStatus == BOT_STATUS_ENABLED) {
-                var user, userId, scores, userScore;
+            console.log('CMD MYSCORE');
+            if(quizbot.botStatus == BOT_STATUS_START) {
+                var userId, score;
 
                 userId = quizbot.message.user.id;
-                user = quizbot.slack.getUserByID(userId);
+                score = quizbot.getUserScore(userId);
 
-                if (!_.isUndefined(user)) {
-                    try {
-                        scores = JSON.parse(Fs.readFileSync(quizbot.config.databases.scores));
-                        userScore = _.findWhere(scores, {"username": "@" + user.name});
-
-                        if (!_.isUndefined(userScore)) {
-                            quizbot.slack.openDM(user.id, function (response) {
-                                quizbot.message.channel = quizbot.slack.getChannelGroupOrDMByID(response.channel.id);
-                                quizbot.message.channel.send(Vsprintf(BotMessage.bot_my_score, [userScore.score]));
-                                quizbot.slack.dms[response.channel.id].close();
-                            });
-                        } else {
-                            quizbot.slack.openDM(user.id, function (response) {
-                                quizbot.message.channel = quizbot.slack.getChannelGroupOrDMByID(response.channel.id);
-                                quizbot.message.channel.send(Vsprintf(BotMessage.bot_my_score_null));
-                                quizbot.slack.dms[response.channel.id].close();
-                            });
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
+                if (score) {
+                    quizbot.slack.openDM(userId, function (response) {
+                        quizbot.message.channel = quizbot.slack.getChannelGroupOrDMByID(response.channel.id);
+                        quizbot.message.channel.send(Vsprintf(BotMessage.bot_my_score, [score]));
+                        quizbot.slack.dms[response.channel.id].close();
+                    });
+                } else {
+                    quizbot.slack.openDM(userId, function (response) {
+                        quizbot.message.channel = quizbot.slack.getChannelGroupOrDMByID(response.channel.id);
+                        quizbot.message.channel.send(Vsprintf(BotMessage.bot_my_score_null));
+                        quizbot.slack.dms[response.channel.id].close();
+                    });
                 }
 
                 quizbot.message.channel = quizbot.slack.getChannelByName(quizbot.config.channel);
@@ -201,7 +202,22 @@ QuizBot = (function(){
 
             return QuizBot;
         },
+        repeat: function(args, quizbot){
+            console.log('CMD REPEAT');
+            if(quizbot.botStatus == BOT_STATUS_START) {
+                quizbot.slack.openDM(quizbot.message.user.id, function (response) {
+                    quizbot.message.channel = quizbot.slack.getChannelGroupOrDMByID(response.channel.id);
+                    quizbot.message.channel.send('*'+quizbot.currentQuestion.question+'*');
+                    quizbot.slack.dms[response.channel.id].close();
+                });
+
+                quizbot.message.channel = quizbot.slack.getChannelByName(quizbot.config.channel);
+            }
+
+            return QuizBot;
+        },
         help: function(args, quizbot){
+            console.log('CMD HELP');
             if(quizbot.botStatus != BOT_STATUS_DISABLED) {
                 var cmds, userId, user;
 
@@ -232,6 +248,27 @@ QuizBot = (function(){
         }
     };
 
+    QuizBot.prototype.getUserScore = function(userId){
+        var user, scores, userScore, quizbot;
+
+        quizbot = this;
+        user = quizbot.slack.getUserByID(userId);
+
+        if (!_.isUndefined(user) && user) {
+            try {
+                scores = JSON.parse(Fs.readFileSync(quizbot.config.databases.scores));
+                userScore = _.findWhere(scores, {"username": "@" + user.name});
+
+                if (!_.isUndefined(userScore) && userScore && 'score' in userScore)
+                    return userScore.score;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        return 0;
+    };
+
     QuizBot.prototype.prepareQuestions = function(){
         var contents = Fs.readFileSync(this.config.databases.questions);
         this.questions = _.first(_.shuffle(JSON.parse(contents)), this.config.quizLimit);
@@ -260,7 +297,7 @@ QuizBot = (function(){
     };
 
     QuizBot.prototype.checkResponse = function(){
-        var re, result, response, message,
+        var re, result, response, message, ignoreWords,
             congratulationDelay = 3000,
             responseDelay = 2000,
             quizbot = this;
@@ -268,6 +305,10 @@ QuizBot = (function(){
         if(quizbot.botStatus == BOT_STATUS_START) {
             response = quizbot.currentQuestion.response;
             message = quizbot.message.text;
+
+            if(_.isUndefined(response) || _.isEmpty(response) || _.isUndefined(message) || _.isEmpty(message))
+                return QuizBot;
+
             re = new RegExp("("+response+")", 'gim');
             result = message.match(re);
 
@@ -277,6 +318,11 @@ QuizBot = (function(){
 
                 _.delay(function(){
                     quizbot.message.channel.send(Vsprintf(BotMessage.give_answer, [response]));
+                    quizbot.message.channel.send(Vsprintf(BotMessage.give_score, [
+                        quizbot.message.userName,
+                        quizbot.config.quizBasePoint,
+                        quizbot.getUserScore(quizbot.message.user.id)
+                    ]));
 
                     _.delay(function(){
                         quizbot.message.channel.send(Vsprintf(BotMessage.next_question_in, [quizbot.config.quizNextQuestionDelay]));
@@ -368,7 +414,7 @@ QuizBot = (function(){
                     return quizbot.message.user.id == id;
                 return false;
             });
-            quizbot.message.isAdmin = !quizbot.message.isAdmin || quizbot.message.isAdmin == 'undefined' ? false : true;
+            quizbot.message.isAdmin = _.isUndefined(quizbot.message.isAdmin) ? quizbot.message.user.is_admin : quizbot.message.isAdmin;
 
             quizbot.logger.info("Received: " + quizbot.message.type + " " + quizbot.message.channelName + " " + quizbot.message.userName + " " + quizbot.message.ts + " \"" + quizbot.message.text + "\"");
 
