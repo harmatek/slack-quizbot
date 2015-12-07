@@ -363,7 +363,11 @@ QuizBot = (function(){
             quizbot.message.channelName = (quizbot.message.channel != null ? quizbot.message.channel.is_channel : void 0) ? '#' : '';
             quizbot.message.channelName = quizbot.message.channelName + (quizbot.message.channel ? quizbot.message.channel.name : 'UNKNOWN_CHANNEL');
             quizbot.message.userName = (quizbot.message.user != null ? quizbot.message.user.name : void 0) != null ? "@" + quizbot.message.user.name : "UNKNOWN_USER";
-            quizbot.message.isAdmin = _.find(quizbot.config.admin, function(id){return quizbot.message.user.id == id});
+            quizbot.message.isAdmin = _.find(quizbot.config.admin, function(id){
+                if(quizbot.message.user != null)
+                    return quizbot.message.user.id == id;
+                return false;
+            });
             quizbot.message.isAdmin = !quizbot.message.isAdmin || quizbot.message.isAdmin == 'undefined' ? false : true;
 
             quizbot.logger.info("Received: " + quizbot.message.type + " " + quizbot.message.channelName + " " + quizbot.message.userName + " " + quizbot.message.ts + " \"" + quizbot.message.text + "\"");
