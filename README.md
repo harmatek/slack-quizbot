@@ -18,10 +18,12 @@ quizLimit: 25, // Number of questions
 quizStartTime: 15, // Time (in seconds) before the first question
 quizNextQuestionDelay: 5, // Time (in seconds) before asking the next question
 quizBasePoint: 5, // Points earned per question
+botCmds: "./src/cmds", // Configuration file (json file) of all commands of the bot. You can change it if necessary.
+botMessages: "./src/messages", // File (json file) describing all the boot messages on the channel. You can change it if necessary.
 channel: "game", // Channel used for bot
 databases: {
-    "questions": "./data/questions.json", // Path to the database (json file) containing the questions
-    "scores": "./data/scores.json" // Path to the database (json file) containing scores
+    questions: "./data/questions.json", // Path to the database (json file) containing the questions
+    scores: "./data/scores.json" // Path to the database (json file) containing scores
 }
 ```
 
@@ -29,10 +31,14 @@ databases: {
 
 ```javascript
 var Config = {
-    "token": "xoxb-219955200-k9fdgdfdf565Rt05566f",
-    "admin": ["U07225LMPB", "U5KJJH0MPL"],
-    "quizLimit": 45,
-    "channel": "quizchan"
+    token: "xoxb-219955200-k9fdgdfdf565Rt05566f",
+    admin: ["U07225LMPB", "U5KJJH0MPL"],
+    quizLimit: 45,
+    channel: "quizchan",
+    databases: {
+        questions: "/path/to/questions/questions.json",
+        scores: "/path/to/scores/scores.json"
+    }
 };
 var QuizBot = require('slack-quizbot');
 var quizbot = new QuizBot(Config);
@@ -41,6 +47,12 @@ quizbot.initialize();
 ```
 
 ## Commands
+
+By default the bot will use **src/cmds.json** module to define the commands that can be executed on the channel.
+This file may be replaced by your (see [Configuration](#configuration) section) for change the name, description and scope of the command. 
+You can also add command aliases such start and begin execute the start function.
+
+### Default commands
 
 * **!enable** : Enable bot
 * **!disable** : Disable bot
@@ -51,9 +63,34 @@ quizbot.initialize();
 * **!repeat** : Give current question (DM)
 * **!help** : Display help (DM)
 
+### Commands file description :
+
+```javascript
+{
+    "enable": // command name on the channel
+    {
+        "desc": "Enable bot", // Command description
+        "fn": "enable", // Function to run
+        "public": false // Public access or administrator only
+    },
+    ...
+}
+```
+
+
+## Messages
+
+The bot messages are defined in the file **src/messages.json**. This file may be replaced 
+with your desired (see [Configuration](#configuration) section).
+
 ## Examples
 
 ### Questions database
+
+By default the questions database is loaded from the file **data/questions.json** 
+whose path is relative to your bot running the file (app.js as in the example). 
+An absolute path is recommended.
+
 ```json
 [
     {"question":"\"Couleur menthe \u00e0 l'eau\" est l'une des chansons de ...","response":"Eddy Mitchell"},
@@ -64,6 +101,11 @@ quizbot.initialize();
 ```
 
 ### Scores database
+
+By default the scores database is loaded from the file **data/scores.json** 
+whose path is relative to your bot running the file (app.js as in the example). 
+An absolute path is recommended.
+
 ```json
 [
   {"username":"@jean","score":26},

@@ -10,24 +10,22 @@
 
 'use strict';
 
-const
-    BOT_STATUS_DISABLED = 0,
-    BOT_STATUS_ENABLED = 1,
-    BOT_STATUS_START = 2,
-    BOT_CMD_KEY = '!'
-;
+var QuizBot = (function(){
+    const
+        BOT_STATUS_DISABLED = 0,
+        BOT_STATUS_ENABLED = 1,
+        BOT_STATUS_START = 2,
+        BOT_CMD_KEY = '!'
+        ;
 
-var QuizBot, Slack, Log, _, BotCMD, BotMessage, Vsprintf, Fs;
+    var Slack, Log, _, Vsprintf, Fs, BotCmds, BotMessages;
 
-_ = require('underscore');
-BotCMD = require('./src/cmd');
-BotMessage = require('./src/messages');
-Slack = require('slack-client');
-Log = require('log');
-Vsprintf = require("sprintf-js").vsprintf;
-Fs = require("fs");
+    _ = require('underscore');
+    Slack = require('slack-client');
+    Log = require('log');
+    Vsprintf = require("sprintf-js").vsprintf;
+    Fs = require("fs");
 
-QuizBot = (function(){
     function QuizBot(config){
         var defaultOptions = {
             token: '',
@@ -40,16 +38,16 @@ QuizBot = (function(){
             quizBasePoint: 5,
             channel: "game",
             admin: [],
-
+            botCmds: "./src/cmds",
+            botMessages: "./src/messages",
             databases: {
-                "questions": "./data/questions.json",
-                "scores": "./data/scores.json"
+                questions: "./data/questions.json",
+                scores: "./data/scores.json"
             }
         };
 
         this.config = _.extend(defaultOptions, config);
         this.logger = new Log(process.env.QUIZBOT_LOG_LEVEL || 'info');
-
         this.slack = {};
         this.message = {};
         this.botStatus = BOT_STATUS_ENABLED;
@@ -73,8 +71,8 @@ QuizBot = (function(){
             cmd = _.isString(match[1]) ? match[1].toLowerCase() : null;
             args = _.isString(match[3]) ? match[3] : null;
 
-            if(cmd && _.isObject(BotCMD[cmd])){
-                cmdInfo = BotCMD[cmd];
+            if(cmd && _.isObject(BotCmds[cmd])){
+                cmdInfo = BotCmds[cmd];
 
                 if(this.message.isAdmin){
                     return this.executeCommand[cmdInfo.fn](args, this);
@@ -122,10 +120,10 @@ QuizBot = (function(){
                 if(quizbot.questions.length){
                     quizbot.botStatus = BOT_STATUS_START;
                     quizbot.logger.info('QuizBot START');
-                    quizbot.message.channel.send(Vsprintf(BotMessage.bot_quizz_start, [quizbot.config.quizStartTime, quizbot.config.quizLimit]));
+                    quizbot.message.channel.send(Vsprintf(BotMessages.bot_quizz_start, [quizbot.config.quizStartTime, quizbot.config.quizLimit]));
                     _.delay(function(){quizbot.askQuestion()}, quizbot.config.quizStartTime*1000);
                 }else{
-                    quizbot.message.channel.send(BotMessage.bot_no_questions);
+                    quizbot.message.channel.send(BotMessages.bot_no_questions);
                 }
             }
 
@@ -137,7 +135,7 @@ QuizBot = (function(){
                 quizbot.botStatus = BOT_STATUS_ENABLED;
                 quizbot.logger.info('QuizBot STOPPED');
                 quizbot.message.channel = quizbot.slack.getChannelByName(quizbot.config.channel);
-                quizbot.message.channel.send(BotMessage.bot_stopped);
+                quizbot.message.channel.send(BotMessages.bot_stopped);
             }
 
             return QuizBot;
@@ -157,7 +155,7 @@ QuizBot = (function(){
 
                         list = _.map(scores, function(item){
                             i++;
-                            return (Vsprintf(BotMessage.bot_score_user, [i, item.username, item.score, i==1?' :sports_medal:':'']));
+                            return (Vsprintf(BotMessages.bot_score_user, [i, item.username, item.score, i==1?' :sports_medal:':'']));
                         });
 
                         quizbot.slack.openDM(user.id, function (response) {
@@ -186,13 +184,13 @@ QuizBot = (function(){
                 if (score) {
                     quizbot.slack.openDM(userId, function (response) {
                         quizbot.message.channel = quizbot.slack.getChannelGroupOrDMByID(response.channel.id);
-                        quizbot.message.channel.send(Vsprintf(BotMessage.bot_my_score, [score]));
+                        quizbot.message.channel.send(Vsprintf(BotMessages.bot_my_score, [score]));
                         quizbot.slack.dms[response.channel.id].close();
                     });
                 } else {
                     quizbot.slack.openDM(userId, function (response) {
                         quizbot.message.channel = quizbot.slack.getChannelGroupOrDMByID(response.channel.id);
-                        quizbot.message.channel.send(Vsprintf(BotMessage.bot_my_score_null));
+                        quizbot.message.channel.send(Vsprintf(BotMessages.bot_my_score_null));
                         quizbot.slack.dms[response.channel.id].close();
                     });
                 }
@@ -225,7 +223,7 @@ QuizBot = (function(){
                 user = quizbot.slack.getUserByID(userId);
 
                 if (!_.isUndefined(user)) {
-                    cmds = _.mapObject(BotCMD, function (info, cmd) {
+                    cmds = _.mapObject(BotCmds, function (info, cmd) {
                         if(quizbot.message.isAdmin)
                             return "*" + BOT_CMD_KEY + cmd + "* : " + info.desc;
                         else if(info.public)
@@ -313,19 +311,19 @@ QuizBot = (function(){
             result = message.match(re);
 
             if(response && !_.isEmpty(result)){
-                quizbot.message.channel.send(Vsprintf(BotMessage.right_answer, [quizbot.message.userName]));
+                quizbot.message.channel.send(Vsprintf(BotMessages.right_answer, [quizbot.message.userName]));
                 quizbot.scoreUpdate(quizbot.message.userName);
 
                 _.delay(function(){
-                    quizbot.message.channel.send(Vsprintf(BotMessage.give_answer, [response]));
-                    quizbot.message.channel.send(Vsprintf(BotMessage.give_score, [
+                    quizbot.message.channel.send(Vsprintf(BotMessages.give_answer, [response]));
+                    quizbot.message.channel.send(Vsprintf(BotMessages.give_score, [
                         quizbot.message.userName,
                         quizbot.config.quizBasePoint,
                         quizbot.getUserScore(quizbot.message.user.id)
                     ]));
 
                     _.delay(function(){
-                        quizbot.message.channel.send(Vsprintf(BotMessage.next_question_in, [quizbot.config.quizNextQuestionDelay]));
+                        quizbot.message.channel.send(Vsprintf(BotMessages.next_question_in, [quizbot.config.quizNextQuestionDelay]));
 
                         _.delay(function(){
                             quizbot.askQuestion();
@@ -391,6 +389,15 @@ QuizBot = (function(){
         return QuizBot;
     };
 
+    QuizBot.prototype.loadSystemeData = function() {
+        try {
+            BotCmds = require(this.config.botCmds);
+            BotMessages = require(this.config.botMessages);
+        } catch (e){
+            throw new Error(e);
+        }
+    };
+
     QuizBot.prototype.connect = function(){
         var quizbot = this;
 
@@ -424,9 +431,9 @@ QuizBot = (function(){
                 if(quizbot.botStatus == BOT_STATUS_DISABLED){
                     if(quizbot.message.channel.is_im){
                         if(quizbot.message.isAdmin){
-                            response = BotMessage.bot_disabled_admin;
+                            response = BotMessages.bot_disabled_admin;
                         }else{
-                            response = BotMessage.bot_disabled;
+                            response = BotMessages.bot_disabled;
                         }
 
                         quizbot.message.channel.send(response);
@@ -468,6 +475,7 @@ QuizBot = (function(){
     QuizBot.prototype.initialize = function(){
         var quizbot = this;
 
+        quizbot.loadSystemeData();
         quizbot.checkDatabases();
         quizbot.connect();
 
